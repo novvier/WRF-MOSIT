@@ -396,7 +396,7 @@ select opt in "${options[@]}"; do
       export GRADS_PICK=2
       break
       ;;
-    3)
+    "Skip")
       echo -e "\nSkip installation"
       export GRADS_PICK=3
       break
