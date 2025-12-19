@@ -497,7 +497,7 @@ echo "Optional Geographical files can be viewed here:"
 echo ""
 printf '\e]8;;https://www2.mmm.ucar.edu/wrf/users/download/get_sources_wps_geog.html\e\\Optional GEOG File Applications Website (right click to open link)\e]8;;\e\\\n'
 echo ""
-PS3="Enter your choice (1 for Yes, 2 for No): "
+PS3="Enter your choice (1 for Yes, 2 for No, 3 for Skip installation): "
 options=("Yes" "No")
 select answer in "${options[@]}"; do
   case $answer in
@@ -511,8 +511,13 @@ select answer in "${options[@]}"; do
       echo "Skipping download of Optional GEOG Data."
       break
       ;;
+    "Skip")
+      echo -e "\nGrADS selected for installation"
+      export GRADS_PICK=3
+      break
+      ;; 
     *)
-      echo "Invalid selection. Please choose 1 or 2."
+      echo -e "\nInvalid option. Please select 1, 2 or 3."
       ;;
   esac
 done

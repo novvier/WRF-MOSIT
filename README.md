@@ -229,11 +229,13 @@ export CMAQ_VERSION=5.5
 - (Make sure to download folder into your Home Directory):
 > cd $HOME
 
-> sudo apt install git -y
+> sudo apt install git nano -y
 
-> git clone https://github.com/HathewayWill/WRF-MOSIT.git
+> git clone https://github.com/novvier/WRF-MOSIT.git
 
 > cd $HOME/WRF-MOSIT
+
+> git checkout nov
 
 > chmod 775 *.sh
 
