@@ -382,22 +382,24 @@ done
 echo "Beginning Installation"
 
 ############################# Chose GrADS or OpenGrADS #########################
-PS3="Enter your choice: "
+PS3="Enter your choice (1 for OpenGrADS, 2 for GrADS, or press Enter to skip): "
 options=("OpenGrADS" "GrADS")
+
 select opt in "${options[@]}"; do
-  case $opt in
-    "OpenGrADS")
+  case $REPLY in
+    1)
       echo -e "\nOpenGrADS selected for installation"
       export GRADS_PICK=1
       break
       ;;
-    "GrADS")
+    2)
       echo -e "\nGrADS selected for installation"
       export GRADS_PICK=2
       break
       ;;
-    *)
-      echo -e "\nInvalid option. Please select 1 or 2."
+    "")
+      export GRADS_PICK=""
+      break
       ;;
   esac
 done
@@ -516,6 +518,102 @@ select answer in "${options[@]}"; do
 done
 
 echo ""
+
+############################## Choice install NCAR COMMAND LANGUAGE ############
+# ONLY apply in Linux Ubuntu_64bit_Intel = 1 & WRF_PICK = 1
+
+echo "NCAR COMMAND LANGUAGE Install"
+PS3="Enter your choice (1 for Yes, 2 for No): "
+options=("Yes" "No")
+select answer in "${options[@]}"; do
+  case $answer in
+    "Yes")
+      export NCL_PICK=1
+      echo "DTC NCL installation selected."
+      break
+      ;;
+    "No")
+      export NCL_PICK=0
+      echo "Skipping NCL installation."
+      break
+      ;;
+    *)
+      echo "Invalid selection. Please choose 1 or 2."
+      ;;
+  esac
+done
+
+############################## Choice install WRF-python ############
+# ONLY apply in Linux Ubuntu_64bit_Intel = 1 & WRF_PICK = 1
+
+echo "WRF Python Install"
+PS3="Enter your choice (1 for Yes, 2 for No): "
+options=("Yes" "No")
+select answer in "${options[@]}"; do
+  case $answer in
+    "Yes")
+      export WRF_PY_PICK=1
+      echo "WRF-python installation selected."
+      break
+      ;;
+    "No")
+      export WRF_PY_PICK=0
+      echo "Skipping WRF-python installation."
+      break
+      ;;
+    *)
+      echo "Invalid selection. Please choose 1 or 2."
+      ;;
+  esac
+done
+
+############################## Choice install OBSGRID ############
+# ONLY apply in Linux Ubuntu_64bit_Intel = 1 & WRF_PICK = 1
+
+echo "OBSGRID Install"
+PS3="Enter your choice (1 for Yes, 2 for No): "
+options=("Yes" "No")
+select answer in "${options[@]}"; do
+  case $answer in
+    "Yes")
+      export OBSGRID_PICK=1
+      echo "OBSGRID installation selected."
+      break
+      ;;
+    "No")
+      export OBSGRID_PICK=0
+      echo "Skipping OBSGRID installation."
+      break
+      ;;
+    *)
+      echo "Invalid selection. Please choose 1 or 2."
+      ;;
+  esac
+done
+
+############################## Choice install Climate Data Operators ############
+# ONLY apply in Linux Ubuntu_64bit_Intel = 1 & WRF_PICK = 1
+
+echo "Climate Data Operators Install"
+PS3="Enter your choice (1 for Yes, 2 for No): "
+options=("Yes" "No")
+select answer in "${options[@]}"; do
+  case $answer in
+    "Yes")
+      export CDO_PICK=1
+      echo "Climate Data Operators installation selected."
+      break
+      ;;
+    "No")
+      export CDO_PICK=0
+      echo "Skipping Climate Data Operators installation."
+      break
+      ;;
+    *)
+      echo "Invalid selection. Please choose 1 or 2."
+      ;;
+  esac
+done
 
 ############################## Choice for which version of WRF to Install ############
 # Define colored message for CMAQ
@@ -25363,6 +25461,10 @@ if [ "$Ubuntu_64bit_Intel" = "1" ] && [ "$WRF_PICK" = "1" ]; then
 
   export one="1"
   echo " "
+
+  # add again the Intel compiler file paths to various environment variables
+  source /opt/intel/oneapi/setvars.sh --force
+
   ############## Testing Environment #####
 
   cd "${WRF_FOLDER}"/Tests/Environment
@@ -25515,137 +25617,140 @@ if [ "$Ubuntu_64bit_Intel" = "1" ] && [ "$WRF_PICK" = "1" ]; then
   ########### NCL compiled via Conda                    ##################
   ########### This is the preferred method by NCAR      ##################
   ########### https://www.ncl.ucar.edu/index.shtml      ##################
-  echo " "
-  echo " "
-  #Installing Miniconda3 to WRF directory and updating libraries
+  if [[ $NCL_PICK -eq 1 ]]; then
+    echo " "
+    echo " "
+    #Installing Miniconda3 to WRF directory and updating libraries
 
-  echo $PASSWD | sudo -S apt -y install python3-zstandard python3-zstd
+    echo $PASSWD | sudo -S apt -y install python3-zstandard python3-zstd
 
-  export Miniconda_Install_DIR="${WRF_FOLDER}"/miniconda3
+    export Miniconda_Install_DIR="${WRF_FOLDER}"/miniconda3
 
-  mkdir -p $Miniconda_Install_DIR
+    mkdir -p $Miniconda_Install_DIR
 
-  wget -c https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $Miniconda_Install_DIR/miniconda.sh
-  bash $Miniconda_Install_DIR/miniconda.sh -b -u -p $Miniconda_Install_DIR
+    wget -c https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $Miniconda_Install_DIR/miniconda.sh
+    bash $Miniconda_Install_DIR/miniconda.sh -b -u -p $Miniconda_Install_DIR
 
-  rm -rf $Miniconda_Install_DIR/miniconda.sh
+    rm -rf $Miniconda_Install_DIR/miniconda.sh
 
-  export PATH="${WRF_FOLDER}"/miniconda3/bin:$PATH
+    export PATH="${WRF_FOLDER}"/miniconda3/bin:$PATH
 
-  source $Miniconda_Install_DIR/etc/profile.d/conda.sh
+    source $Miniconda_Install_DIR/etc/profile.d/conda.sh
 
-  $Miniconda_Install_DIR/bin/conda init bash
+    $Miniconda_Install_DIR/bin/conda init bash
 
-  conda tos accept
-  conda config --add channels conda-forge
-  conda config --set auto_activate_base false
-  conda update -n root --all -y
+    conda tos accept
+    conda config --add channels conda-forge
+    conda config --set auto_activate_base false
+    conda update -n root --all -y
 
-  #Special Thanks to @_WaylonWalker for code development
-  echo " "
-  #Installing NCL via Conda
-  source $Miniconda_Install_DIR/etc/profile.d/conda.sh
+    #Special Thanks to @_WaylonWalker for code development
+    echo " "
+    #Installing NCL via Conda
+    source $Miniconda_Install_DIR/etc/profile.d/conda.sh
 
-  conda create -n ncl_stable -c conda-forge ncl -y
-  conda activate ncl_stable
+    conda create -n ncl_stable -c conda-forge ncl -y
+    conda activate ncl_stable
 
-  conda deactivate
-  conda deactivate
-  conda deactivate
+    conda deactivate
+    conda deactivate
+    conda deactivate
 
-  echo " "
+    echo " "
 
   ############################OBSGRID###############################
   ## OBSGRID
   ## Downloaded from git tagged releases
   ## Option #3
   ########################################################################
-  cd "${WRF_FOLDER}"/
-  git clone https://github.com/wrf-model/OBSGRID.git
-  cd "${WRF_FOLDER}"/OBSGRID
-
-  LD_LIBRARY_PATH= ./clean -a
-  source $Miniconda_Install_DIR/etc/profile.d/conda.sh
-  conda activate ncl_stable
-
-  export HOME=$(
-    cd
-    pwd
-  )
-  export DIR="${WRF_FOLDER}"/Libs
-  export NETCDF=$DIR/NETCDF
-
-  if [ ${auto_config} -eq 1 ]; then
-    echo 3 | ./configure 2>&1 | tee configure.log #Option 3 for itnel and distribunted memory
-  else
-    ./configure 2>&1 | tee configure.log #Option 3 for intel and distribunted memory
-  fi
-
-  sed -i '27s/-lnetcdf -lnetcdff/ -lnetcdff -lnetcdf/g' configure.oa
-
-  sed -i '31s/-lncarg -lncarg_gks -lncarg_c -lX11 -lm -lcairo/-lncarg -lncarg_gks -lncarg_c -lX11 -lm -lcairo -lfontconfig -lpixman-1 -lfreetype -lhdf5 -lhdf5_hl /g' configure.oa
-
-  sed -i '38s/ifort/ifx/g' configure.oa
-  sed -i '43s/gcc/icx/g' configure.oa
-  sed -i '45s|/lib/cpp|ifx|g' configure.oa
-  sed -i '46s|-I. -C -P -DDEC -traditional|-fpp -DDEC -I.|g' configure.oa
-
-  # Patch .F90.o rule to use direct compile with Intel Fortran + fpp
-  sed -i '/^\.F90\.o:/,/^\t\$(RM) \$\*\.f/ c\.F90.o:\n\t$(RM) $@ $*.mod\n\t$(FC) $(FFLAGS) -fpp $(CPPFLAGS) ${NETCDF_INC} -c $<' configure.oa
-
-  echo " "
-  LD_LIBRARY_PATH= ./compile 2>&1 | tee compile.obsgrid.log
-
-  conda deactivate
-  conda deactivate
-  conda deactivate
-
-  echo " "
-  # IF statement to check that all files were created.
-  if [[ -x ./obsgrid.exe ]]; then
-    echo "obsgrid.exe found."
-    read -r -t 5 -p "Finished installing OBSGRID. I am going to wait for 5 seconds only ..."
-  else
-    echo "obsgrid.exe is missing. Attempting to compile again..."
+  if [ "$OBSGRID_PICK" = "1" ]; then
+    cd "${WRF_FOLDER}"/
+    git clone https://github.com/wrf-model/OBSGRID.git
+    cd "${WRF_FOLDER}"/OBSGRID
 
     LD_LIBRARY_PATH= ./clean -a
-    LD_LIBRARY_PATH= ./compile 2>&1 | tee compile.obsgrid.retry.log
+    source $Miniconda_Install_DIR/etc/profile.d/conda.sh
+    conda activate ncl_stable
 
-    if [[ -x ./obsgrid.exe ]]; then
-      echo "obsgrid.exe successfully created after recompilation."
-      read -r -t 5 -p "Finished retrying OBSGRID compile. I am going to wait for 5 seconds only ..."
+    export HOME=$(
+      cd
+      pwd
+    )
+    export DIR="${WRF_FOLDER}"/Libs
+    export NETCDF=$DIR/NETCDF
+
+    if [ ${auto_config} -eq 1 ]; then
+      echo 3 | ./configure 2>&1 | tee configure.log #Option 3 for itnel and distribunted memory
     else
-      echo "Still missing obsgrid.exe after recompile. Exiting the script."
-      read -r -p "Please contact script authors for assistance. Press 'Enter' to exit."
-      exit 1
+      ./configure 2>&1 | tee configure.log #Option 3 for intel and distribunted memory
     fi
-  fi
 
-  echo " "
+    sed -i '27s/-lnetcdf -lnetcdff/ -lnetcdff -lnetcdf/g' configure.oa
+
+    sed -i '31s/-lncarg -lncarg_gks -lncarg_c -lX11 -lm -lcairo/-lncarg -lncarg_gks -lncarg_c -lX11 -lm -lcairo -lfontconfig -lpixman-1 -lfreetype -lhdf5 -lhdf5_hl /g' configure.oa
+
+    sed -i '38s/ifort/ifx/g' configure.oa
+    sed -i '43s/gcc/icx/g' configure.oa
+    sed -i '45s|/lib/cpp|ifx|g' configure.oa
+    sed -i '46s|-I. -C -P -DDEC -traditional|-fpp -DDEC -I.|g' configure.oa
+
+    # Patch .F90.o rule to use direct compile with Intel Fortran + fpp
+    sed -i '/^\.F90\.o:/,/^\t\$(RM) \$\*\.f/ c\.F90.o:\n\t$(RM) $@ $*.mod\n\t$(FC) $(FFLAGS) -fpp $(CPPFLAGS) ${NETCDF_INC} -c $<' configure.oa
+
+    echo " "
+    LD_LIBRARY_PATH= ./compile 2>&1 | tee compile.obsgrid.log
+
+    conda deactivate
+    conda deactivate
+    conda deactivate
+
+    echo " "
+    # IF statement to check that all files were created.
+    if [[ -x ./obsgrid.exe ]]; then
+      echo "obsgrid.exe found."
+      read -r -t 5 -p "Finished installing OBSGRID. I am going to wait for 5 seconds only ..."
+    else
+      echo "obsgrid.exe is missing. Attempting to compile again..."
+
+      LD_LIBRARY_PATH= ./clean -a
+      LD_LIBRARY_PATH= ./compile 2>&1 | tee compile.obsgrid.retry.log
+
+      if [[ -x ./obsgrid.exe ]]; then
+        echo "obsgrid.exe successfully created after recompilation."
+        read -r -t 5 -p "Finished retrying OBSGRID compile. I am going to wait for 5 seconds only ..."
+      else
+        echo "Still missing obsgrid.exe after recompile. Exiting the script."
+        read -r -p "Please contact script authors for assistance. Press 'Enter' to exit."
+        exit 1
+      fi
+    fi
+
+    echo " "
 
   ##################### WRF Python           ##################
   ########### WRf-Python compiled via Conda  ##################
   ########### This is the preferred method by NCAR      ##################
   ##### https://wrf-python.readthedocs.io/en/latest/installation.html  ##################
-  source $Miniconda_Install_DIR/etc/profile.d/conda.sh
-  conda env create -f $HOME/WRF-MOSIT/wrf-python-stable.yml
+  if [ "$NCL_PICK" = "1" ] && [ "$WRF_PY_PICK" = "1" ]; then  
+    source $Miniconda_Install_DIR/etc/profile.d/conda.sh
+    conda env create -f $HOME/WRF-MOSIT/wrf-python-stable.yml
 
   ######################### Climate Data Operators ############
   ######################### CDO compiled via Conda ###########
   ####################### This is the preferred method #######
   ################### https://bairdlangenbrunner.github.io/python-for-climate-scientists/conda/setting-up-conda-environments.html #######################
+  if [ "$CDO_PICK" = "1" ] && [ "$WRF_PY_PICK" = "1" ]; then  
+    source $Miniconda_Install_DIR/etc/profile.d/conda.sh
 
-  source $Miniconda_Install_DIR/etc/profile.d/conda.sh
+    conda create --name cdo_stable -y
+    conda activate cdo_stable
+    conda install -c conda-forge cdo -y
+    conda update --all -y
+    conda deactivate
+    conda deactivate
+    conda deactivate
 
-  conda create --name cdo_stable -y
-  conda activate cdo_stable
-  conda install -c conda-forge cdo -y
-  conda update --all -y
-  conda deactivate
-  conda deactivate
-  conda deactivate
-
-  echo " "
+    echo " "
 
   ############################ WRF #################################
   ## WRF v${WPS_VERSION}
