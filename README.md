@@ -235,7 +235,7 @@ export CMAQ_VERSION=5.5
 
 > cd $HOME/WRF-MOSIT
 
-> git checkout nov
+> git switch nov
 
 > chmod 775 *.sh
 
