@@ -25227,7 +25227,7 @@ if [ "$Ubuntu_64bit_Intel" = "1" ] && [ "$WRF_PICK" = "1" ]; then
 
   # add signed entry to apt sources and configure the APT client to use Intel repository:
   echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-  
+
   # this update should get the Intel package info from the Intel repository
   echo $PASSWD | sudo -S apt -y update
 
